@@ -1,0 +1,161 @@
+#!/bin/bash
+##############################################################################
+# $Id$
+# backup_rsync crée avec cs par fab le 'Thu Jun 16 09:16:28 CEST 2011'
+VERSION=0.0.1
+# Objectif :
+# Avoir un snapshot du pauvre
+# rsync -a --delete --link-dest=../backup.1 data/ backup.0
+# Author: Fabrice Mendes
+# Last Revision :
+# - $Revision$
+# - $Author$
+# - $Date$
+#
+######################################################(FAb)###################
+
+#
+# Voir backup_rsync.lib.sh
+#
+
+Self=$0
+ME=$(basename $Self)
+export PATH=$PATH:~/bin
+lib=functions.sh
+[ -f $(dirname $0)/$lib ] && . $(dirname $0)/$lib || . ~/bin/$lib
+
+lib=$ME.lib.sh
+[ -f $(dirname $0)/$lib ] && . $(dirname $0)/$lib || . ~/bin/$lib
+
+function help()
+{
+	[ "x$1" != "x" ] && status=$1 || status=$EXIT_FAILURE
+	echo "$ME target
+$ME [--help|--version]
+-c configfile
+-n -> dry run
+--fake
+-v verbose
+"
+	exit  $status
+
+}
+function print_version()
+{
+    echo "$ME $VERSION"
+    exit $EXIT_SUCCESS
+}
+
+function  parse_args()
+{
+    [ "$1" = "" ] && die "NoArg"
+    while [ "$1" ]
+    do
+	case "$1" in
+	    -h|--help) help; exit $EXIT_SUCCESS;
+	        ;;
+	    --version) echo $VERSION; exit $EXIT_SUCCESS;
+	        ;;
+            -n)
+                dr='--dry-run'
+                shift
+                ;;
+            -c)
+                shift
+                [ "x$1" = "x" ] && die "missing argument configfile"
+                sConfigFile="$1"
+                shift
+                ;;
+            --fake)
+                bFake=1;
+                shift
+                ;;
+            -v)
+                echo "Verbose"
+                VERBOSE=1
+                shift;;
+	    *)
+                TGT="$1"
+                break
+	        ;;
+	 esac
+    done
+}
+
+###
+### Main
+###
+TGT=
+dr=''
+
+case $(hostname -s) in
+    antaya)
+        buffer=$(ps aux |grep ioquake|grep -v grep)
+        if [ "x$buffer" != "x" ]; then
+            echo "Quake found... aborting."
+        fi
+        ;;
+esac
+parse_args "$@"
+
+[ "x$sConfigFile" != "x" -a -f "$sConfigFile" ] && source "$sConfigFile"
+
+uniquify_filename "$TGT"
+sKey=$singleton
+TAGDATE="$(date +"%Y%m%d-%H%M%S")"
+D_SnapCopy="$D_STOCK/$sKey/${PREFIX}${TAGDATE}"
+D_WorkCopy="$D_TARGET"/
+D_RefCopy=
+
+mkdir -p "$D_STOCK/logs/$sKey"
+LOGFILE="$D_STOCK/logs/$sKey/${PREFIX}${TAGDATE}.log"
+touch "$LOGFILE"
+chmod 700 "$LOGFILE"
+
+find_ref auto
+if [ $? -eq 1 ]; then
+    #error "cp not ready"
+    show_env
+    #mkdir -v "$D_SnapCopy"
+    mkdir "$D_SnapCopy"
+    echo "Initialization by copy"
+    [ $bFake -eq 1 ] && exit 0
+    cp -auv "$TGT"/* "$D_SnapCopy/"
+    exit $?;
+fi
+
+#D_RefCopy="$D_STOCK/$sKey/$REF/$D_TARGET"
+D_RefCopy="$(echo "$D_STOCK/$sKey/$REF"| sed -e 's@\(.*\)/$@@')"
+D_RefCopy=../"$(echo "$REF"| sed -e 's@\(.*\)/$@@')"
+mkdir "$D_SnapCopy"
+
+
+show_env
+
+#1 Naif :
+# prend des paramètres et fait le job
+#rsync -an --delete --link-dest=../backup.1 data/ backup.$(date +"%Y%m%d-%H%M%S")
+#echo cd "$D_DIRNAME_TARGET"
+cd "$D_DIRNAME_TARGET"
+debug "pwd=$PWD"
+
+sCmd="rsync -Hapvr $dr --delete --link-dest=$D_RefCopy/ $D_WorkCopy $D_SnapCopy/ "
+if [ $bFake -eq 1 ]; then
+    rm -r "$D_SnapCopy"
+#    echo "fake    rsync -Hapvr '$dr' --delete --link-dest='$D_RefCopy' '$D_WorkCopy' '$D_SnapCopy/'"
+    echo "fake "$sCmd |tee >>"$LOGFILE"
+    exit 0
+fi
+
+#set -x
+#rsync -Hapvr "$dr" --delete --link-dest="$D_RefCopy/" "$D_WorkCopy" "$D_SnapCopy/"
+$sCmd >>"$LOGFILE" 2>&1
+res=$?
+
+if [ $VERBOSE -eq 1 ]; then
+    cat "$LOGFILE"
+fi
+
+exit $res
+#exit $EXIT_SUCCESS
+

@@ -1,0 +1,65 @@
+commit bc6e695210e8bb97881344d5b202f4717a7c3624
+Author: FAb Mendes <fab@antaya.fr>
+Date:   Sun Mar 24 22:00:29 2013 +0000
+
+    Ajout aide
+
+commit 7f549293fb487d5a0287a971ae347cb7dad7bbc4
+Author: FAb Mendes <fab@antaya.fr>
+Date:   Thu Feb 16 22:29:25 2012 +0000
+
+    Del space
+
+commit d3622c3718c465fa766238d4f4f49db211d65379
+Author: FAb Mendes <fab@antaya.fr>
+Date:   Mon Jan 30 15:45:19 2012 +0000
+
+    Exclusion des snapshots lorsque quake tourne
+
+commit 85b2d07e176bc8f82dbb5c10ec7116dee82ea3ae
+Author: FAb Mendes <fab@antaya.fr>
+Date:   Sat Oct 15 18:57:15 2011 +0000
+
+    Ajout du script de purge et lib liée
+
+commit 2ddc7abd1f6752afcb81187454533c5e252185a4
+Author: FAb Mendes <fab@antaya.fr>
+Date:   Wed Aug 3 09:33:57 2011 +0000
+
+    modif ligne inclusion lib
+
+commit 5a9aa0db01d14075449b9cdbf38f8ed85e2ccb5d
+Author: FAb Mendes <fab@antaya.fr>
+Date:   Mon Aug 1 21:20:33 2011 +0000
+
+    Bug corrigé, MeP à la sauvage, purge à finir
+
+commit 6afc8dd0591264a810f5b211e5be36a88f80615c
+Author: FAb Mendes <fab@antaya.fr>
+Date:   Sun Jul 31 21:41:15 2011 +0000
+
+    backup_rsync doc++
+
+commit 59fade739c7cc7ad4df0d1c8ab086970594522f5
+Author: FAb Mendes <fab@antaya.fr>
+Date:   Sun Jul 31 21:37:02 2011 +0000
+
+    backup_rsync doc++
+
+commit 3cf8b0a038b10cda735fc1313ebbc4be761e6203
+Author: FAb Mendes <fab@antaya.fr>
+Date:   Sun Jul 31 21:25:47 2011 +0000
+
+    C'est presque prêt mais ça coince grave sur un niveau de profondeur.
+
+commit aeec7552c45ad5b8b39ee0e19c6035b4a1f70a4a
+Author: FAb Mendes <fab@antaya.fr>
+Date:   Thu Jun 23 19:09:05 2011 +0000
+
+    Ébauche backup et test
+
+commit b9eba4f2eb7d83690a9a0364a82d218bcb51d6f7
+Author: FAb Mendes <fab@antaya.fr>
+Date:   Thu Jun 16 07:22:55 2011 +0000
+
+    mineur

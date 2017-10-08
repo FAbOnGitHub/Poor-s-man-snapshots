@@ -1,0 +1,156 @@
+#!/bin/bash
+##############################################################################
+# $Id$
+# backup_rsync crée avec cs par fab le 'Thu Jun 16 09:16:28 CEST 2011'
+VERSION=0.0.1
+# Objectif :
+# Avoir un snapshot du pauvre
+# rsync -a --delete --link-dest=../backup.1 data/ backup.0
+# Author: Fabrice Mendes
+# Last Revision :
+# - $Revision$
+# - $Author$
+# - $Date$
+#
+######################################################(FAb)###################
+
+#
+# Voir backup_rsync.lib.sh
+#
+
+Self=$0
+ME=$(basename $Self)
+export PATH=$PATH:~/bin
+lib=functions.sh
+[ -f $(dirname $0)/$lib ] && . $(dirname $0)/$lib || . ~/bin/$lib
+
+lib=backup_rsync.lib.sh
+[ -f $(dirname $0)/$lib ] && . $(dirname $0)/$lib || . ~/bin/$lib
+
+function help()
+{
+	[ "x$1" != "x" ] && status=$1 || status=$EXIT_FAILURE
+	echo "$ME target
+$ME [--help|--version]"
+	exit  $status
+
+}
+function print_version()
+{
+    echo "$ME $VERSION"
+    exit $EXIT_SUCCESS
+}
+
+function  parse_args()
+{
+    [ "$1" = "" ] && die "NoArg"
+    while [ "$1" ]
+    do
+	case "$1" in
+	    -h|--help) help; exit $EXIT_SUCCESS;
+	        ;;
+	    --version) echo $VERSION; exit $EXIT_SUCCESS;
+	        ;;
+            --fake)
+                bFake=1;
+                shift
+                ;;
+            -a)
+                shift
+                [ "x$1" = "x" ] && die "missing argument age (integer)"
+                iAge="$1"
+                shift
+                ;;
+            -c)
+                shift
+                [ "x$1" = "x" ] && die "missing argument configfile"
+                sConfigFile="$1"
+                shift
+                ;;
+            -v)
+                echo "Verbose"
+                VERBOSE=1
+                shift;;
+	    *)
+                TGT="$1"
+                break
+	        ;;
+	 esac
+    done
+}
+
+###
+### Main
+###
+TGT=
+bForce=0
+iAge=7
+parse_args "$@"
+LOGFILE=$(mklog_file $ME)
+
+[ "x$sConfigFile" != "x" -a -f "$sConfigFile" ] && source "$sConfigFile"
+
+uniquify_filename "$TGT"
+sKey=$singleton
+##TAGDATE="$(date +"%Y%m%d-%H%M%S")"
+##D_SnapCopy="$D_STOCK/$sKey/${PREFIX}${TAGDATE}"
+D_WorkCopy="$D_TARGET"/
+D_RefCopy=
+
+[ ! -d "$D_STOCK" ] && die "Missing dir D_STOCK '$D_STOCK'"
+[ ! -d "$D_STOCK/$sKey" ] && die "Missing dir sKey '$D_STOCK/$sKey'"
+[ ! -d "$D_STOCK/logs" ] && die "Missing dir logs '$D_STOCK/logs'"
+[ ! -d "$D_STOCK/logs/$sKey" ] && die "Missing dir logs '$D_STOCK/logs/$sKey'"
+
+show_env
+
+cd "$D_STOCK/logs/$sKey"
+debug "pwd=$PWD"
+
+sCmd="find . -maxdepth 1 -type f -atime +$iAge "
+debug "sCmd=$sCmd"
+
+#set -x
+#$sCmd >>"$LOGFILE" 2>&1
+declare -a aKeys=( $( $sCmd | grep .log |sort|cut -c 3-17 ) )
+res=$?
+
+if [ ${#aKeys[*]} -eq 0 ] ;then
+    verbose "No dir to delete"
+    exit $EXIT_SUCCESS
+fi
+
+for k in ${aKeys[*]}
+do
+    kick="$D_STOCK/$sKey/$k"
+    kick_log="$D_STOCK/logs/$sKey/$k.log"
+    if [ -d $kick ]; then
+        if [ $bFake -eq 0 ]; then
+            rm -rf $kick
+            rc_rm=$?
+            if [ $rc_rm -ne $EXIT_SUCCESS ]; then
+                error "rm kick='$kick' failed"
+                continue
+            fi
+            rm -rf $kick_log
+            rc_log=$?
+            if [ $rc_log -ne $EXIT_SUCCESS ]; then
+                error "rm kick_log='$kick_log' failed"
+                continue
+            fi
+        else
+            echo "fake rm -rf $kick"
+        fi
+    else
+        error "$ME no dir kick='$kick'"
+        rm -f "$kick_log"
+    fi
+done
+
+if [ $VERBOSE -eq 1 ]; then
+    cat "$LOGFILE"
+    date > "$LOGFILE"
+fi
+
+exit $res
+#exit $EXIT_SUCCESS

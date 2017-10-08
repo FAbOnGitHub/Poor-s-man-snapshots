@@ -1,0 +1,23 @@
+commit 990cbd5669d6cf80859f285e8d352a7dc6d16e2c
+Author: FAb Mendes <fab@antaya.fr>
+Date:   Wed Jan 30 10:18:03 2013 +0000
+
+    bug-- sur 1 nom variable\! Gosh\!
+
+commit 30efc9744cdf03bdba99eb2bef1e2f7db2620ca1
+Author: FAb Mendes <fab@antaya.fr>
+Date:   Thu Jan 17 16:08:13 2013 +0000
+
+    bug-- sur liste vite dans backup; osd-notify webradio; new abbrevs; new alias
+
+commit 86079acf2c126b9b7f6d676c5f5b68b002be77f0
+Author: FAb Mendes <fab@antaya.fr>
+Date:   Wed Nov 2 10:09:07 2011 +0000
+
+    Manip autour synchro dico
+
+commit 85b2d07e176bc8f82dbb5c10ec7116dee82ea3ae
+Author: FAb Mendes <fab@antaya.fr>
+Date:   Sat Oct 15 18:57:15 2011 +0000
+
+    Ajout du script de purge et lib liée
